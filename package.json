@@ -14,5 +14,8 @@
     "@snowpack/plugin-sass": "^1.4.0",
     "eslint": "^8.47.0",
     "snowpack": "^3.8.8"
+  },
+  "dependencies": {
+    "prettier": "3.0.2"
   }
 }
