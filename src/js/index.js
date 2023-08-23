@@ -39,8 +39,19 @@ class DatePicker {
 
   constructor() {
     this.initCalendarDate();
+    this.initSelectedDate();
     this.assignElement();
+    this.setDateInput();
     this.addEvent();
+  }
+
+  initSelectedDate() {
+    this.selectedDate = { ...this.#calendarDate };
+  }
+
+  setDateInput() {
+    this.dateInputEl.textContent = this.formateDate(this.selectedDate.data);
+    this.dateInputEl.dataset.value = this.selectedDate.data;
   }
 
   initCalendarDate() {
@@ -72,6 +83,50 @@ class DatePicker {
     this.dateInputEl.addEventListener("click", this.toggleCalendar.bind(this));
     this.nextBtnEl.addEventListener("click", this.moveToNextMonth.bind(this));
     this.prevBtnEl.addEventListener("click", this.moveToPrevMonth.bind(this));
+    this.calendarDatesEl.addEventListener(
+      "click",
+      this.onClickSelectDate.bind(this),
+    );
+  }
+
+  onClickSelectDate(event) {
+    const eventTarget = event.target;
+    // data-date 속성이 있을때
+    if (eventTarget.dataset.date) {
+      // 일단 selected 클래스 있다면 전부 삭제해
+      this.calendarDatesEl
+        .querySelector(".selected")
+        ?.classList.remove("selected");
+      // 그리고 내가 금방 클릭한 날짜에 selected를 붙여줘
+      eventTarget.classList.add("selected");
+      this.selectedDate = {
+        data: new Date(
+          this.#calendarDate.year,
+          this.#calendarDate.month,
+          eventTarget.dataset.date,
+        ),
+        year: this.#calendarDate.year,
+        month: this.#calendarDate.month,
+        date: eventTarget.dataset.date,
+      };
+      this.setDateInput();
+      this.calendarEl.classList.remove("active");
+    }
+  }
+
+  formateDate(dateData) {
+    let date = dateData.getDate();
+    if (date < 10) {
+      date = `0${date}`;
+    }
+
+    let month = dateData.getMonth() + 1;
+    if (month < 10) {
+      month = `0${month}`;
+    }
+
+    let year = dateData.getFullYear();
+    return `${year}/${month}/${date}`;
   }
 
   moveToNextMonth() {
@@ -95,6 +150,9 @@ class DatePicker {
   }
 
   toggleCalendar() {
+    if (this.calendarEl.classList.contains("active")) {
+      this.#calendarDate = { ...this.selectedDate };
+    }
     this.calendarEl.classList.toggle("active");
     this.updateMonth();
     this.updateDates();
@@ -133,6 +191,18 @@ class DatePicker {
     this.colorSaturday();
     this.colorSunday();
     this.markToday();
+    this.markSelectedDate();
+  }
+
+  markSelectedDate() {
+    if (
+      this.selectedDate.year === this.#calendarDate.year &&
+      this.selectedDate.month === this.#calendarDate.month
+    ) {
+      this.calendarDatesEl
+        .querySelector(`[data-date='${this.selectedDate.date}']`)
+        .classList.add("selected");
+    }
   }
 
   markToday() {
